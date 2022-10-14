@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block  title %}
+    {{ block.super }}
+{% endblock %}
+
+{% block css %}
+    <style>
+        .btn-valeh {
+            color: white;
+            background-color: #d35400;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+
+    <section class="mt-5">
+        <div class="container">
+            <h1 class="text-center">All Products</h1>
+
+            <div id="search-div" class="mt-4">
+                <form>
+                    <div class="input-group mb-3">
+                        <input class="form-control me-2" type="search" id="search" placeholder="Search" name="search"
+                               aria-label="Search" {% if search %}value="{{ search }}"{% endif %}>
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-success" type="submit">Search</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col">
+                                <label>Min. price</label>
+                                <input type="number" id="min_price" name="min_price"
+                                       class="form-control" {% if min_price %}value="{{ min_price }}"{% endif %}>
+                            </div>
+                            <div class="col">
+                                <label>Max. price</label>
+                                <input type="number" id="max_price" name="max_price"
+                                       class="form-control" {% if max_price %}value="{{ max_price }}"{% endif %}>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        {% for category in categories %}
+                            <h4>{{ category.name }}</h4>
+                            {% for subcategory in category.subcategory_set.all %}
+                                <input type="radio" name="subcategory" value="{{ subcategory.id }}"
+                                       {% if selected_subcategory == subcategory.id %}checked{% endif %}>
+                                {{ subcategory.name }}
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                </form>
+            </div>
+
+            {% if search %}
+                <h5> Results for "{{ search }}" ( {{ products.count }} )</h5>
+            {% endif %}
+
+
+            <div id="products" class="align-items-center mt-5 row">
+                {% for product in products %}
+                    <div class="card mb-3 col-md-5 col-sm-12 mx-1">
+                        <div class="row no-gutters">
+                            <div class="col-md-4">
+                                {% if product.productimage_set.all %}
+                                    <img src="{{ product.main_product_image }}" class="card-img" alt="..."
+                                         style="height: 200px; width: 180px;">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ product.name }}</h5>
+                                    <p class="card-text">{{ product.description|safe }}</p>
+                                    <h5 class="card-text">{{ product.total_price|floatformat:2 }} AZN</h5>
+                                    <p class="card-text"><small
+                                            class="text-muted">Created {{ product.created_at|timesince }} ago</small>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {% if paginator.num_pages > 1 %}
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center">
+                        {% if products.has_previous %}
+                            <li class="page-item"><a class="page-link bg-dark text-light"
+                                                     href="?page={{ products.previous_page_number }}">
+                                <
+                            </a></li>
+                        {% endif %}
+                        {% for i in products.paginator.page_range %}
+                            {% if products.number == i %}
+                                <li class="page-item active"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                            {% elif products.number != i %}
+                                <li class="page-item"><a class="page-link" href="?page=
+                                        {{ i }}{% if search %}&search={{ search }}{% endif %}">{{ i }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if products.has_next %}
+                            <li class="page-item"><a class="page-link bg-dark text-light"
+                                                     href="?page={{ products.next_page_number }}">
+                                >
+                            </a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+
+        </div>
+    </section>
+
+{% endblock %}

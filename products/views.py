@@ -1,8 +1,11 @@
-from django.shortcuts import render
-from .models import Product, Category
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Product, Category, Subcategory, ProductImage
 from django.db.models import Q, F, FloatField
 from django.db.models.functions import Coalesce
 from django.core.paginator import Paginator
+from .forms import ProductForm
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 # Create your views here.
 
 
@@ -58,4 +61,44 @@ def index_view(request):
     context["products"] = product_list
     context["paginator"] = paginator
     context["categories"] = categories
-    return render(request, "index.html", context)
+    return render(request, "products/list.html", context)
+
+
+@login_required
+def create_view(request):
+    product_form = ProductForm()
+
+    if request.method == "POST":
+        product_form = ProductForm(request.POST or None)
+        images = request.FILES.getlist("image", None)
+        subcategory = request.POST.get("subcategory")
+
+        if product_form.is_valid() and images:
+            new_product = product_form.save(commit=False)
+            new_product.user = request.user
+            new_product.subcategory = get_object_or_404(Subcategory, id=int(subcategory))
+            new_product.save()
+
+            for image in images:
+                ProductImage.objects.create(
+                    product=new_product, image=image
+                )
+
+            return redirect("products:index")
+        else:
+            print(product_form.errors)
+
+    context = {
+        "product_form": product_form,
+    }
+    return render(request, "products/create.html", context)
+
+
+def load_subcategories(request):
+    data = {}
+    category = request.POST.get("category", None)
+    if category:
+        subcategories = Subcategory.objects.filter(category__id=int(category))
+
+        data = [{"id": subcategory.id, "name": subcategory.name} for subcategory in subcategories]
+    return JsonResponse({"subcategories": data})

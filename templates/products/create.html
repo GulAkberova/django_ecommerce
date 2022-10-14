@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>Create Page</title>
+{% endblock %}
+
+{% block body %}
+    <section class="mt-5">
+        <div class="container">
+            <h1 class="text-center">Create Page</h1>
+
+            <form method="POST" class="p-5" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="form-group mb-2">
+                    <label class="mb-2">{{ product_form.name.label_tag }}</label><br>
+                    {{ product_form.name }}
+                </div>
+
+                <div class="form-group mb-2">
+                    <label class="mb-2">{{ product_form.description.label_tag }}</label><br>
+                    {{ product_form.description }}
+                </div>
+
+                <div class="form-group mb-2">
+                    <label class="mb-2">{{ product_form.brand.label_tag }}</label><br>
+                    {{ product_form.brand }}
+                </div>
+
+                <div class="form-group mb-2">
+                    <label class="mb-2">{{ product_form.category.label_tag }}</label><br>
+                    {{ product_form.category }}
+                </div>
+
+                <div class="form-group mb-2">
+                    <label class="mb-2">Subcategory</label><br>
+                    <select name="subcategory" id="id_subcategory" class="form-control">
+                        <option value="">---------</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-2">
+                    <label class="mb-2">{{ product_form.price.label_tag }}</label><br>
+                    {{ product_form.price }}
+                </div>
+
+                <div class="form-group mb-2">
+                    <label class="mb-2">{{ product_form.tax_price.label_tag }}</label><br>
+                    {{ product_form.tax_price }}
+                </div>
+
+                <div class="form-group mb-2">
+                    <label class="mb-2">{{ product_form.discount_price.label_tag }}</label><br>
+                    {{ product_form.discount_price }}
+                </div>
+
+
+                <h4>Images</h4>
+                <div class="form-group mb-4">
+                    <div id="imagesDiv" class="mb-4">
+                        <input type="file" name="image" accept="image/png, image/gif, image/jpeg" />
+                    </div>
+
+                    <a class="btn btn-primary" id="addImageButton" onclick="addImage()"> + </a>
+                </div>
+
+
+
+                <button type="submit" class="btn btn-success btn-lg">Create Product</button>
+            </form>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+
+    <script>
+        var load_subcategories_url = "{% url 'products:load-subcategories' %}"
+    </script>
+
+    <script>
+        $("#id_category").change(function (event){
+
+            var myHeaders = new Headers();
+            myHeaders.append(
+                "X-CSRFToken",
+                document.querySelector("[name=csrfmiddlewaretoken]").value
+            );
+
+            var formData = new FormData();
+
+            formData.append("category", event.target.value);
+
+            var requestOptions = {
+                method: "POST",
+                headers: myHeaders,
+                body: formData,
+                redirect: "follow",
+              };
+
+            response = fetch(load_subcategories_url, requestOptions).then(function (response) {
+                if (response.ok) {
+                  response.json().then((data) => {
+                      var subcategories = data.subcategories
+
+                      $("#id_subcategory").html(`
+                        <option id="">---------</option>
+                      `)
+
+                      for(var i=0; i<subcategories.length; i++){
+                          $("#id_subcategory").append(`
+                                <option value="${subcategories[i]["id"]}">${subcategories[i]["name"]}</option>
+                          `)
+                      }
+                  });
+                }
+            });
+        })
+
+
+        function addImage(){
+            var image_inputs = $("input[type='file']").length
+
+
+
+            if(image_inputs < 3){
+                $("#imagesDiv").append(`
+                    <input type="file" name="image" accept="image/png, image/gif, image/jpeg" />
+                `)
+            }
+
+            if(image_inputs >= 2){
+                $("#addImageButton").css("display", "none")
+            }
+        }
+    </script>
+
+{% endblock %}
