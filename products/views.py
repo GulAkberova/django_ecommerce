@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Product, Category, Subcategory, ProductImage
+from .models import Product, Category, Subcategory, ProductImage, Brand
 from django.db.models import Q, F, FloatField
 from django.db.models.functions import Coalesce
 from django.core.paginator import Paginator
-from .forms import ProductForm
+from .forms import ProductForm, ProductUpdateForm
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 # Create your views here.
@@ -53,7 +53,7 @@ def index_view(request):
         )
         context["selected_subcategory"] = int(subcategory)
 
-    paginator = Paginator(products, 2)
+    paginator = Paginator(products, 10)
     page = request.GET.get('page', 1)
     product_list = paginator.get_page(page)
 
@@ -102,3 +102,54 @@ def load_subcategories(request):
 
         data = [{"id": subcategory.id, "name": subcategory.name} for subcategory in subcategories]
     return JsonResponse({"subcategories": data})
+
+
+def create_brand_view(request):
+    brand_name = request.POST.get("brand_name", None)
+
+    new_brand = Brand.objects.create(
+        name=brand_name
+    )
+
+    data = {
+        "id": new_brand.id,
+        "name": new_brand.name
+    }
+    return JsonResponse(data)
+
+
+def update_view(request, slug):
+    context = {}
+    product = get_object_or_404(Product, slug=slug)
+    product_form = ProductUpdateForm(instance=product)
+    categories = Category.objects.order_by("-created_at")
+
+    if request.method == "POST":
+        product_form = ProductUpdateForm(request.POST or None, instance=product)
+        subcategory = request.POST.get("subcategory")
+        images = request.FILES.getlist("image", None)
+
+        if product_form.is_valid() and images:
+            updated_product = product_form.save(commit=False)
+            updated_product.subcategory = get_object_or_404(Subcategory, id=int(subcategory))
+            updated_product.save()
+
+            for image in images:
+                ProductImage.objects.create(
+                    product=updated_product, image=image
+                )
+
+            return redirect("products:index")
+
+    context["product"] = product
+    context["product_form"] = product_form
+    context["categories"] = categories
+    return render(request, "products/update.html", context)
+
+
+
+def delete_view(request):
+    id = request.POST.get("id")
+    product = get_object_or_404(Product, id=int(id))
+    product.delete()
+    return JsonResponse({})
