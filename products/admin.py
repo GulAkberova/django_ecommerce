@@ -1,12 +1,10 @@
 from django.contrib import admin
-from .models import (
-    Category, Subcategory, Brand, Product, ProductImage
-)
+from .models import Category, Subcategory, Brand, Product, ProductImage
+
 # Register your models here.
 
 
 class CategoryAdmin(admin.ModelAdmin):
-
     class Meta:
         model = Category
 
@@ -27,7 +25,6 @@ admin.site.register(Subcategory, SubcategoryAdmin)
 
 
 class BrandAdmin(admin.ModelAdmin):
-
     class Meta:
         model = Brand
 
@@ -37,16 +34,24 @@ class BrandAdmin(admin.ModelAdmin):
 admin.site.register(Brand, BrandAdmin)
 
 
-
-
 class ProductImageInline(admin.StackedInline):
-  model = ProductImage
-  max_num=10
-  extra=1
+    model = ProductImage
+    max_num = 10
+    extra = 1
+
 
 class ProductAdmin(admin.ModelAdmin):
-  inlines = [ProductImageInline,]
-  list_display = ("name", "subcategory", "brand", "price", "tax_price", "discount_price")
+    inlines = [
+        ProductImageInline,
+    ]
+    list_display = (
+        "name",
+        "subcategory",
+        "brand",
+        "price",
+        "tax_price",
+        "discount_price",
+    )
 
 
 admin.site.register(Product, ProductAdmin)

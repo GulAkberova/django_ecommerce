@@ -6,15 +6,14 @@ from .utils import create_slug_shortcode
 
 User = get_user_model()
 
+
 class BaseMixin(models.Model):
     slug = models.SlugField(unique=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-
     class Meta:
         abstract = True
-
 
 
 class Category(BaseMixin):
@@ -33,7 +32,6 @@ class Category(BaseMixin):
             self.slug = create_slug_shortcode(size=12, model_=Category)
 
         super(Category, self).save(*args, **kwargs)
-
 
 
 class Subcategory(BaseMixin):
@@ -55,8 +53,6 @@ class Subcategory(BaseMixin):
         super(Subcategory, self).save(*args, **kwargs)
 
 
-
-
 class Brand(BaseMixin):
     name = models.CharField(max_length=300)
 
@@ -75,12 +71,13 @@ class Brand(BaseMixin):
         super(Brand, self).save(*args, **kwargs)
 
 
-
 class Product(BaseMixin):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=300)
     description = models.TextField(blank=True, null=True)
-    subcategory = models.ForeignKey(Subcategory, on_delete=models.SET_NULL, blank=True, null=True)
+    subcategory = models.ForeignKey(
+        Subcategory, on_delete=models.SET_NULL, blank=True, null=True
+    )
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, blank=True, null=True)
 
     # price fields
@@ -92,16 +89,15 @@ class Product(BaseMixin):
         return self.name or self.slug
 
     class Meta:
-        ordering = ("-created_at", )
+        ordering = ("-created_at",)
         verbose_name = "Product"
         verbose_name_plural = "Products"
-
 
     def main_product_image(self):
         product_images = ProductImage.objects.filter(product=self)
         if product_images.exists():
             return product_images.first().image.url
-        return '-'
+        return "-"
 
     # def total_price(self):
     #     tax_price = self.tax_price if self.tax_price else 0
@@ -115,8 +111,8 @@ class Product(BaseMixin):
         super(Product, self).save(*args, **kwargs)
 
 
-def upload_to(instance,filename):
-    return '%s/%s/%s'%('products',instance.product.name,filename)
+def upload_to(instance, filename):
+    return "%s/%s/%s" % ("products", instance.product.name, filename)
 
 
 class ProductImage(BaseMixin):
@@ -127,7 +123,7 @@ class ProductImage(BaseMixin):
         return self.product.name or self.slug
 
     class Meta:
-        ordering = ("-created_at", )
+        ordering = ("-created_at",)
         verbose_name = "Product Image"
         verbose_name_plural = "Product Images"
 
