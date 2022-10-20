@@ -19,45 +19,7 @@
     <section class="mt-5">
         {% csrf_token %}
         <div class="container">
-            <h1 class="text-center">All Products</h1>
-
-            <div id="search-div" class="mt-4">
-                <form>
-                    <div class="input-group mb-3">
-                        <input class="form-control me-2" type="search" id="search" placeholder="Search" name="search"
-                               aria-label="Search" {% if search %}value="{{ search }}"{% endif %}>
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-success" type="submit">Search</button>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="row">
-                            <div class="col">
-                                <label>Min. price</label>
-                                <input type="number" id="min_price" name="min_price"
-                                       class="form-control" {% if min_price %}value="{{ min_price }}"{% endif %}>
-                            </div>
-                            <div class="col">
-                                <label>Max. price</label>
-                                <input type="number" id="max_price" name="max_price"
-                                       class="form-control" {% if max_price %}value="{{ max_price }}"{% endif %}>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        {% for category in categories %}
-                            <h4>{{ category.name }}</h4>
-                            {% for subcategory in category.subcategory_set.all %}
-                                <input type="radio" name="subcategory" value="{{ subcategory.id }}"
-                                       {% if selected_subcategory == subcategory.id %}checked{% endif %}>
-                                {{ subcategory.name }}
-                            {% endfor %}
-                        {% endfor %}
-                    </div>
-                </form>
-            </div>
+            <h1 class="text-center">Wishlist Products</h1>
 
             {% if search %}
                 <h5> Results for "{{ search }}" ( {{ products.count }} )</h5>
@@ -87,17 +49,12 @@
                                     <br><br>
 
                                     {% if request.user.is_authenticated %}
-                                        <span onclick="addWishlist('{{ product.id }}')" id="wishDiv-{{ product.id }}">
+                                        <span onclick="addWishlist('{{ product.id }}')" id="wishDiv">
                                             {% if request.user in product.wishlist.all %}
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" fill="#c0392b" height="24" viewBox="0 0 24 24"><path d="M12 4.248c-3.148-5.402-12-3.825-12 2.944 0 4.661 5.571 9.427 12 15.808 6.43-6.381 12-11.147 12-15.808 0-6.792-8.875-8.306-12-2.944z"/></svg>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4.248c-3.148-5.402-12-3.825-12 2.944 0 4.661 5.571 9.427 12 15.808 6.43-6.381 12-11.147 12-15.808 0-6.792-8.875-8.306-12-2.944z"/></svg>
                                             {% else %}
                                                 <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181"/></svg>
                                             {% endif %}
-                                        </span>
-                                        <span onclick="addBasket('{{ product.id }}')" id="basketDiv-{{ product.id }}" style="font-size: 20px;cursor: pointer;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-basket-fill" viewBox="0 0 16 16">
-                                              <path d="M5.071 1.243a.5.5 0 0 1 .858.514L3.383 6h9.234L10.07 1.757a.5.5 0 1 1 .858-.514L13.783 6H15.5a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5H15v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9H.5a.5.5 0 0 1-.5-.5v-2A.5.5 0 0 1 .5 6h1.717L5.07 1.243zM3.5 10.5a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0v-3zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0v-3zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0v-3zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0v-3zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0v-3z"/>
-                                            </svg>
                                         </span>
                                     {% endif %}
                                     <br><br>
@@ -111,33 +68,6 @@
                     </div>
                 {% endfor %}
             </div>
-
-            {% if paginator.num_pages > 1 %}
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination justify-content-center">
-                        {% if products.has_previous %}
-                            <li class="page-item"><a class="page-link bg-dark text-light"
-                                                     href="?page={{ products.previous_page_number }}">
-                                <
-                            </a></li>
-                        {% endif %}
-                        {% for i in products.paginator.page_range %}
-                            {% if products.number == i %}
-                                <li class="page-item active"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
-                            {% elif products.number != i %}
-                                <li class="page-item"><a class="page-link" href="?page=
-                                        {{ i }}{% if search %}&search={{ search }}{% endif %}">{{ i }}</a></li>
-                            {% endif %}
-                        {% endfor %}
-                        {% if products.has_next %}
-                            <li class="page-item"><a class="page-link bg-dark text-light"
-                                                     href="?page={{ products.next_page_number }}">
-                                >
-                            </a></li>
-                        {% endif %}
-                    </ul>
-                </nav>
-            {% endif %}
 
         </div>
     </section>
@@ -166,8 +96,7 @@
     <script>
         var delete_url = "{% url 'products:delete' %}"
         var wish_url = "{% url 'products:wish' %}"
-        var basket_url = "{% url 'products:add-basket' %}"
-        var fill_heart_svg = `<svg xmlns="http://www.w3.org/2000/svg" fill="#c0392b" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4.248c-3.148-5.402-12-3.825-12 2.944 0 4.661 5.571 9.427 12 15.808 6.43-6.381 12-11.147 12-15.808 0-6.792-8.875-8.306-12-2.944z"/></svg>`
+        var fill_heart_svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4.248c-3.148-5.402-12-3.825-12 2.944 0 4.661 5.571 9.427 12 15.808 6.43-6.381 12-11.147 12-15.808 0-6.792-8.875-8.306-12-2.944z"/></svg>`
         var heart_svg = `<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181"/></svg>`
     </script>
 
@@ -234,40 +163,10 @@
                         response.json().then((data) => {
                             console.log(data)
                             if(data.success){
-                                $("#wishDiv-"+id).html(fill_heart_svg)
+                                $("#wishDiv").html(fill_heart_svg)
                             }else{
-                                $("#wishDiv-"+id).html(heart_svg)
+                                $("#wishDiv").html(heart_svg)
                             }
-                        });
-                    }
-                });
-        }
-    </script>
-
-
-    <script>
-        function addBasket(id){
-            var myHeaders = new Headers();
-            myHeaders.append(
-                "X-CSRFToken",
-                document.querySelector("[name=csrfmiddlewaretoken]").value
-            );
-
-            var formData = new FormData();
-
-            formData.append("id", id);
-
-            var requestOptions = {
-                method: "POST",
-                headers: myHeaders,
-                body: formData,
-                redirect: "follow",
-            };
-
-            response = fetch(basket_url, requestOptions).then(function (response) {
-                    if (response.ok) {
-                        response.json().then((data) => {
-                            $("#basket_counter").text(data.basket_count)
                         });
                     }
                 });

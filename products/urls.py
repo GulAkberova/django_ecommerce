@@ -10,4 +10,10 @@ urlpatterns = [
     path("create-brand/", views.create_brand_view, name="create-brand"),
     path("update/<slug>/", views.update_view, name="update"),
     path("delete/", views.delete_view, name="delete"),
+
+    path("wish/", views.user_wishlist_view, name="wish"),
+    path("wishlist/", views.wishlist_product_view, name="wishlist"),
+
+    path("add/basket/", views.add_basket_view, name="add-basket"),
+    path("basket/", views.basket_list_view, name="basket"),
 ]

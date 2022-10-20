@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Product, Category, Subcategory, ProductImage, Brand
+from .models import Product, Category, Subcategory, ProductImage, Brand, Basket
 from django.db.models import Q, F, FloatField
 from django.db.models.functions import Coalesce
 from django.core.paginator import Paginator
@@ -149,3 +149,55 @@ def delete_view(request):
     product = get_object_or_404(Product, id=int(id))
     product.delete()
     return JsonResponse({})
+
+def user_wishlist_view(request):
+    data = {}
+    id = request.POST.get("id")
+    product = get_object_or_404(Product, id=int(id))
+
+    if request.user in product.wishlist.all():
+        data['success'] = False
+        product.wishlist.remove(request.user)
+    else:
+        product.wishlist.add(request.user)
+        data['success'] = True
+
+    product.save()
+    return JsonResponse(data)
+
+def wishlist_product_view(request):
+    context = {}
+
+    products = Product.objects.filter(wishlist__in=[request.user]).annotate(
+            tax_float_price=Coalesce("tax_price", 0, output_field=FloatField())
+        ).annotate(
+            discount_float_price=Coalesce(
+                "discount_price", 0, output_field=FloatField()
+            )
+        ).annotate(
+            total_price=F("price") + F("tax_float_price") - F("discount_float_price")
+        ).order_by("-created_at")
+
+    context["products"] = products
+    return render(request, "products/wishlist.html", context)
+
+def add_basket_view(request):
+    data = {}
+
+    id = request.POST.get("id")
+    product = get_object_or_404(Product, id=int(id))
+
+    if not Basket.objects.filter(product=product, user=request.user).exists():
+        Basket.objects.create(
+            product=product, user=request.user
+        )
+
+    data['basket_count'] = Basket.objects.filter(user=request.user).count()
+    return JsonResponse(data)
+
+def basket_list_view(request):
+    context = {}
+
+    baskets = Basket.objects.filter(user=request.user).order_by("-id")
+    context['baskets'] = baskets
+    return render(request, "products/basket.html", context)
