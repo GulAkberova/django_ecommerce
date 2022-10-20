@@ -13,19 +13,19 @@
                 {% csrf_token %}
 
                 <div class="form-group mb-2">
-                    <label class="mb-2">{{ product_form.name.label_tag }}</label><br>
-                    {{ product_form.name }}
+                    <label class="mb-2">{{ form.name.label_tag }}</label><br>
+                    {{ form.name }}
                 </div>
 
                 <div class="form-group mb-2">
-                    <label class="mb-2">{{ product_form.description.label_tag }}</label><br>
-                    {{ product_form.description }}
+                    <label class="mb-2">{{ form.description.label_tag }}</label><br>
+                    {{ form.description }}
                 </div>
 
                 <div class="form-group mb-2">
-                    <label class="mb-2">{{ product_form.brand.label_tag }}</label><br>
+                    <label class="mb-2">{{ form.brand.label_tag }}</label><br>
                     <div class="input-group mb-3">
-                        {{ product_form.brand }}
+                        {{ form.brand }}
                         <div class="input-group-append">
                             <span class="input-group-text btn btn-warning"
                                   data-bs-toggle="modal" data-bs-target="#createBrand">+</span>
@@ -34,8 +34,8 @@
                 </div>
 
                 <div class="form-group mb-2">
-                    <label class="mb-2">{{ product_form.category.label_tag }}</label><br>
-                    {{ product_form.category }}
+                    <label class="mb-2">{{ form.category.label_tag }}</label><br>
+                    {{ form.category }}
                 </div>
 
                 <div class="form-group mb-2">
@@ -46,18 +46,18 @@
                 </div>
 
                 <div class="form-group mb-2">
-                    <label class="mb-2">{{ product_form.price.label_tag }}</label><br>
-                    {{ product_form.price }}
+                    <label class="mb-2">{{ form.price.label_tag }}</label><br>
+                    {{ form.price }}
                 </div>
 
                 <div class="form-group mb-2">
-                    <label class="mb-2">{{ product_form.tax_price.label_tag }}</label><br>
-                    {{ product_form.tax_price }}
+                    <label class="mb-2">{{ form.tax_price.label_tag }}</label><br>
+                    {{ form.tax_price }}
                 </div>
 
                 <div class="form-group mb-2">
-                    <label class="mb-2">{{ product_form.discount_price.label_tag }}</label><br>
-                    {{ product_form.discount_price }}
+                    <label class="mb-2">{{ form.discount_price.label_tag }}</label><br>
+                    {{ form.discount_price }}
                 </div>
 
 

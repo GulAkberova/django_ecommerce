@@ -16,4 +16,9 @@ urlpatterns = [
 
     path("add/basket/", views.add_basket_view, name="add-basket"),
     path("basket/", views.basket_list_view, name="basket"),
+
+
+    path("class/list/", views.ProductListView.as_view(), name="class-list"),
+    path("class/detail/<slug>/", views.ProductDetailView.as_view(), name="class-detail"),
+    path("class/create/", views.ProductCreateView.as_view(), name="class-create"),
 ]

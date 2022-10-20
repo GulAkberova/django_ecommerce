@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from .models import Product, Category, Subcategory, ProductImage, Brand, Basket
 from django.db.models import Q, F, FloatField
 from django.db.models.functions import Coalesce
@@ -201,3 +201,158 @@ def basket_list_view(request):
     baskets = Basket.objects.filter(user=request.user).order_by("-id")
     context['baskets'] = baskets
     return render(request, "products/basket.html", context)
+
+
+
+# Class Based Views
+
+from django.views import View
+from django.views.generic import ListView, DetailView
+from django.views.generic.edit import FormView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
+
+# class ProductListView(View):
+#
+#     valeh = "valeh"
+#
+#     def get(self, request, *args, **kwargs):
+#         context = {}
+#         search = request.GET.get("search", None)
+#         min_price = request.GET.get("min_price", None)
+#         max_price = request.GET.get("max_price", None)
+#         subcategory = request.GET.get("subcategory", None)
+#
+#         products = (
+#             Product.objects.annotate(
+#                 tax_float_price=Coalesce("tax_price", 0, output_field=FloatField())
+#             )
+#                 .annotate(
+#                 discount_float_price=Coalesce(
+#                     "discount_price", 0, output_field=FloatField()
+#                 )
+#             )
+#                 .annotate(
+#                 total_price=F("price") + F("tax_float_price") - F("discount_float_price")
+#             )
+#                 .order_by("-created_at")
+#         )
+#
+#         categories = Category.objects.order_by("-created_at")
+#
+#         if search:
+#             products = products.filter(
+#                 Q(name__icontains=search) | Q(description__icontains=search)
+#             )
+#             context["search"] = search
+#
+#         if min_price or max_price:
+#             if min_price:
+#                 products = products.filter(total_price__gte=float(min_price))
+#                 context["min_price"] = min_price
+#
+#             if max_price:
+#                 products = products.filter(total_price__lte=float(max_price))
+#                 context["max_price"] = max_price
+#
+#         if subcategory:
+#             products = products.filter(subcategory__id=int(subcategory))
+#             context["selected_subcategory"] = int(subcategory)
+#
+#         paginator = Paginator(products, 10)
+#         page = request.GET.get("page", 1)
+#         product_list = paginator.get_page(page)
+#
+#         context["products"] = product_list
+#         context["paginator"] = paginator
+#         context["categories"] = categories
+#         context["valeh"] = self.valeh
+#         return render(request, "products/list.html", context)
+#
+#
+# class ProductCreateView(View):
+#
+#     def get(self, request, *args, **kwargs):
+#         product_form = ProductForm()
+#         context = {
+#             "product_form": product_form,
+#         }
+#         return render(request, "products/create.html", context)
+#
+#
+#     def post(self, request, *args, **kwargs):
+#         context = {}
+#         product_form = ProductForm(request.POST or None)
+#         images = request.FILES.getlist("image", None)
+#         subcategory = request.POST.get("subcategory")
+#
+#         if product_form.is_valid() and images:
+#             new_product = product_form.save(commit=False)
+#             new_product.user = request.user
+#             new_product.subcategory = get_object_or_404(
+#                 Subcategory, id=int(subcategory)
+#             )
+#             new_product.save()
+#
+#             for image in images:
+#                 ProductImage.objects.create(product=new_product, image=image)
+#
+#             return redirect("products:index")
+#         return render(request, "products/create.html", context)
+
+
+
+class ProductListView(ListView):
+    queryset = Product.objects.all()
+    template_name = "products/list.html"
+    context_object_name = "products"
+
+    # def get_queryset(self):
+    #     products = (
+    #                     Product.objects.annotate(
+    #                         tax_float_price=Coalesce("tax_price", 0, output_field=FloatField())
+    #                     )
+    #                         .annotate(
+    #                         discount_float_price=Coalesce(
+    #                             "discount_price", 0, output_field=FloatField()
+    #                         )
+    #                     )
+    #                         .annotate(
+    #                         total_price=F("price") + F("tax_float_price") - F("discount_float_price")
+    #                     )
+    #                         .order_by("-created_at")
+    #                 )
+    #
+    #     search = self.request.GET.get("search", None)
+    #     if search:
+    #         products = products.filter(
+    #                         Q(name__icontains=search) | Q(description__icontains=search)
+    #                     )
+    #     return products
+
+
+
+class ProductDetailView(DetailView):
+    valeh = "valeh"
+    template_name = "products/detail.html"
+    queryset = Product.objects.all()
+    lookup_field = "slug"
+    context_object_name = "product"
+
+    def get_context_data(self, **kwargs):
+        context = super(ProductDetailView, self).get_context_data(**kwargs)
+
+        context["valeh"] = self.valeh
+        return context
+
+
+
+class ProductCreateView(CreateView):
+    model = Product
+    template_name = 'products/create.html'
+    # fields = ["name", "description"]
+    form_class = ProductForm
+    success_url = '/'
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
